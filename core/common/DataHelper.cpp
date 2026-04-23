@@ -126,6 +126,7 @@ void assign(NFriend& afriend, const nakama::api::Friend& data) {
   assign(afriend.user, data.user());
   afriend.state = static_cast<NFriend::State>(data.state().value());
   assign(afriend.updateTime, data.update_time());
+  assign(afriend.metadata, data.metadata());
 }
 
 void assign(NFriendList& friends, const nakama::api::FriendList& data) {
