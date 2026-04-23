@@ -21,7 +21,13 @@
 // That's where FORCE_DLL_IMPORT_EXPORT might be defined on some platforms
 #include <nakama-cpp/config.h>
 
-#if defined _WIN32 || defined __CYGWIN__  || defined FORCE_DLL_IMPORT_EXPORT
+#if defined FORCE_STATIC && (defined FORCE_DLL_IMPORT_EXPORT || defined NAKAMA_SHARED_LIBRARY_EXPORTS || defined FORCE_DLL_VISIBILITY)
+    #error FORCE_STATIC defined, but shared library setup detected
+#endif
+
+#if defined FORCE_STATIC
+    #define NAKAMA_API
+#elif defined _WIN32 || defined __CYGWIN__  || defined FORCE_DLL_IMPORT_EXPORT
     #ifdef NAKAMA_SHARED_LIBRARY_EXPORTS
         #define NAKAMA_API __declspec(dllexport)
     #else
