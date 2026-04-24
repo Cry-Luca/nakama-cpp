@@ -26,6 +26,12 @@
 #undef NMODULE_NAME
 #define NMODULE_NAME "NRtClient"
 
+#if _HAS_EXCEPTIONS
+#define _WHAT(e) e.what()
+#else
+#define _WHAT(e)
+#endif
+
 namespace Nakama {
 
 NRtClient::NRtClient(NRtTransportPtr transport, const std::string& host, int32_t port, bool ssl)
@@ -164,18 +170,18 @@ void NRtClient::onTransportConnected() {
     _listener->onConnect();
   }
 
-  try {
+  _TRY_BEGIN
     if (_connectPromise) {
       // signal to the user's future that the connection has completed.
       _connectPromise->set_value();
       _connectPromise.reset(nullptr);
     }
-  } catch (const std::future_error& e) {
+  _CATCH (const std::future_error& e)
     //  std::future_error on the following conditions:
     //  *this has no shared state. The error code is set to no_state.
     //  The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
-    NLOG_WARN("Unexpected exception caught on transport connect: " + std::string(e.what()));
-  }
+    NLOG_WARN("Unexpected exception caught on transport connect: " + std::string(_WHAT(e)));
+  _CATCH_END
 }
 
 void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
@@ -187,7 +193,7 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
     _listener->onDisconnect(info);
   }
 
-  try {
+  _TRY_BEGIN
     if (_connectPromise) {
       // assume we are disconnecting mid-connect
       _connectPromise->set_exception(
@@ -195,12 +201,12 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
               NRtException(NRtError(RtErrorCode::CONNECT_ERROR, "Disconnected while connecting."))));
       _connectPromise.reset(nullptr);
     }
-  } catch (const std::future_error& e) {
+  _CATCH (const std::future_error& e)
     // std::future_error on the following conditions:
     // *this has no shared state. The error code is set to no_state.
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
-    NLOG_WARN("Unexpected exception caught on transport disconnect: " + std::string(e.what()));
-  }
+    NLOG_WARN("Unexpected exception caught on transport disconnect: " + std::string(_WHAT(e)));
+  _CATCH_END
 }
 
 void NRtClient::onTransportError(const std::string& description) {
@@ -216,19 +222,19 @@ void NRtClient::onTransportError(const std::string& description) {
     _listener->onError(error);
   }
 
-  try {
+  _TRY_BEGIN
     if (_connectPromise) {
       _connectPromise->set_exception(
           std::make_exception_ptr<NRtException>(
               NRtException(NRtError(RtErrorCode::CONNECT_ERROR, "An error occurred while connecting."))));
       _connectPromise.reset(nullptr);
     }
-  } catch (const std::future_error& e) {
+  _CATCH (const std::future_error& e)
     // std::future_error on the following conditions:
     // *this has no shared state. The error code is set to no_state.
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
-    NLOG_WARN("Unexpected exception caught on transport error: " + std::string(e.what()));
-  }
+    NLOG_WARN("Unexpected exception caught on transport error: " + std::string(_WHAT(e)));
+  _CATCH_END
 }
 
 void NRtClient::onTransportMessage(const NBytes& data) {
