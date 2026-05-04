@@ -35,6 +35,7 @@ NAKAMA_NAMESPACE_BEGIN
         NUser user;                           ///< The user object.
         State state;                          ///< The friend status.
         NTimestamp updateTime = 0;            ///< Time of the latest relationship update.
+        std::string metadata;                 ///< Additional information stored as a JSON object.
     };
 
 NAKAMA_NAMESPACE_END
