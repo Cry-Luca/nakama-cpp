@@ -33,6 +33,12 @@
 #undef NMODULE_NAME
 #define NMODULE_NAME "Nakama::RestClient"
 
+#if _HAS_EXCEPTIONS
+#define _WHAT(e) e.what()
+#else
+#define _WHAT(e)
+#endif
+
 using namespace std;
 
 namespace Nakama {
@@ -178,7 +184,7 @@ void RestClient::onResponse(RestReqContext* reqContext, NHttpResponsePtr respons
         errMessage.append("message: ").append(response->errorMessage);
       } else if (!response->body.empty() && response->body[0] == '{') // have to be JSON
       {
-        try {
+        _TRY_BEGIN
           rapidjson::Document document;
 
           if (document.Parse(response->body).HasParseError()) {
@@ -224,9 +230,9 @@ void RestClient::onResponse(RestReqContext* reqContext, NHttpResponsePtr respons
               }
             }
           }
-        } catch (exception& e) {
-          NLOG_ERROR("exception: " + string(e.what()));
-        }
+        _CATCH (exception& e)
+          NLOG_ERROR("exception: " + string(_WHAT(e)));
+        _CATCH_END
       }
 
       if (errMessage.empty()) {
@@ -264,7 +270,7 @@ void RestClient::authenticateDevice(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -298,9 +304,9 @@ void RestClient::authenticateDevice(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/device", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateEmail(
@@ -311,7 +317,7 @@ void RestClient::authenticateEmail(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -342,9 +348,9 @@ void RestClient::authenticateEmail(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/email", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateFacebook(
@@ -355,7 +361,7 @@ void RestClient::authenticateFacebook(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -386,9 +392,9 @@ void RestClient::authenticateFacebook(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/facebook", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateGoogle(
@@ -398,7 +404,7 @@ void RestClient::authenticateGoogle(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -428,9 +434,9 @@ void RestClient::authenticateGoogle(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/google", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateGameCenter(
@@ -445,7 +451,7 @@ void RestClient::authenticateGameCenter(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -480,9 +486,9 @@ void RestClient::authenticateGameCenter(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/gamecenter", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateApple(
@@ -492,7 +498,7 @@ void RestClient::authenticateApple(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -522,9 +528,9 @@ void RestClient::authenticateApple(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/apple", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateCustom(
@@ -534,7 +540,7 @@ void RestClient::authenticateCustom(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -564,9 +570,9 @@ void RestClient::authenticateCustom(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/custom", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateSteam(
@@ -576,7 +582,7 @@ void RestClient::authenticateSteam(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto sessionData(make_shared<nakama::api::Session>());
@@ -606,9 +612,9 @@ void RestClient::authenticateSteam(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/authenticate/steam", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::authenticateRefresh(
@@ -616,7 +622,7 @@ void RestClient::authenticateRefresh(
     const NStringMap& vars,
     std::function<void(NSessionPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     auto sessionData(make_shared<nakama::api::Session>());
     RestReqContext* ctx = createReqContext(sessionData.get());
     setBasicAuth(ctx);
@@ -642,15 +648,15 @@ void RestClient::authenticateRefresh(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/session/refresh", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 void RestClient::sessionLogout(
     NSessionPtr session,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     RestReqContext* ctx = createReqContext(nullptr);
     setSessionAuth(ctx, session);
 
@@ -668,9 +674,9 @@ void RestClient::sessionLogout(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/session/logout", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkFacebook(
@@ -679,7 +685,7 @@ void RestClient::linkFacebook(
     const std::optional<bool>& importFriends,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -701,9 +707,9 @@ void RestClient::linkFacebook(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/facebook", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkEmail(
@@ -712,7 +718,7 @@ void RestClient::linkEmail(
     const std::string& password,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -730,9 +736,9 @@ void RestClient::linkEmail(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/email", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkDevice(
@@ -740,7 +746,7 @@ void RestClient::linkDevice(
     const std::string& id,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -757,9 +763,9 @@ void RestClient::linkDevice(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/device", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkGoogle(
@@ -767,7 +773,7 @@ void RestClient::linkGoogle(
     const std::string& accessToken,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -784,9 +790,9 @@ void RestClient::linkGoogle(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/google", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkGameCenter(
@@ -799,7 +805,7 @@ void RestClient::linkGameCenter(
     const std::string& publicKeyUrl,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -821,9 +827,9 @@ void RestClient::linkGameCenter(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/gamecenter", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkApple(
@@ -831,7 +837,7 @@ void RestClient::linkApple(
     const std::string& token,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -848,9 +854,9 @@ void RestClient::linkApple(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/apple", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkSteam(
@@ -858,7 +864,7 @@ void RestClient::linkSteam(
     const std::string& token,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -875,9 +881,9 @@ void RestClient::linkSteam(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/steam", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::linkCustom(
@@ -885,7 +891,7 @@ void RestClient::linkCustom(
     const std::string& id,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -902,9 +908,9 @@ void RestClient::linkCustom(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/link/custom", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkFacebook(
@@ -912,7 +918,7 @@ void RestClient::unlinkFacebook(
     const std::string& accessToken,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -929,9 +935,9 @@ void RestClient::unlinkFacebook(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/facebook", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkEmail(
@@ -940,7 +946,7 @@ void RestClient::unlinkEmail(
     const std::string& password,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -958,9 +964,9 @@ void RestClient::unlinkEmail(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/email", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkGoogle(
@@ -968,7 +974,7 @@ void RestClient::unlinkGoogle(
     const std::string& accessToken,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -985,9 +991,9 @@ void RestClient::unlinkGoogle(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/google", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkGameCenter(
@@ -1000,7 +1006,7 @@ void RestClient::unlinkGameCenter(
     const std::string& publicKeyUrl,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1022,9 +1028,9 @@ void RestClient::unlinkGameCenter(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/gamecenter", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkApple(
@@ -1032,7 +1038,7 @@ void RestClient::unlinkApple(
     const std::string& token,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1049,9 +1055,9 @@ void RestClient::unlinkApple(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/apple", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkSteam(
@@ -1059,7 +1065,7 @@ void RestClient::unlinkSteam(
     const std::string& token,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1076,9 +1082,9 @@ void RestClient::unlinkSteam(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/steam", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkDevice(
@@ -1086,7 +1092,7 @@ void RestClient::unlinkDevice(
     const std::string& id,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1103,9 +1109,9 @@ void RestClient::unlinkDevice(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/device", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::unlinkCustom(
@@ -1113,7 +1119,7 @@ void RestClient::unlinkCustom(
     const std::string& id,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1130,9 +1136,9 @@ void RestClient::unlinkCustom(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/account/unlink/custom", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::importFacebookFriends(
@@ -1141,7 +1147,7 @@ void RestClient::importFacebookFriends(
     const std::optional<bool>& reset,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1163,16 +1169,16 @@ void RestClient::importFacebookFriends(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/friend/facebook", std::move(body), std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::getAccount(
     NSessionPtr session,
     std::function<void(const NAccount&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto accoutData(make_shared<nakama::api::Account>());
@@ -1189,16 +1195,16 @@ void RestClient::getAccount(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/account", "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteAccount(
     NSessionPtr session,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1208,9 +1214,9 @@ void RestClient::deleteAccount(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::DEL, "/v2/account", "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::updateAccount(
@@ -1223,7 +1229,7 @@ void RestClient::updateAccount(
     const std::optional<std::string>& timezone,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1251,9 +1257,9 @@ void RestClient::updateAccount(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::PUT, "/v2/account", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::getUsers(
@@ -1263,7 +1269,7 @@ void RestClient::getUsers(
     const std::vector<std::string>& facebookIds,
     std::function<void(const NUsers&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto usersData(make_shared<nakama::api::Users>());
@@ -1294,9 +1300,9 @@ void RestClient::getUsers(
     }
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/user", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::addFriends(
@@ -1305,7 +1311,7 @@ void RestClient::addFriends(
     const std::vector<std::string>& usernames,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1325,9 +1331,9 @@ void RestClient::addFriends(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/friend", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteFriends(
@@ -1336,7 +1342,7 @@ void RestClient::deleteFriends(
     const std::vector<std::string>& usernames,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1356,9 +1362,9 @@ void RestClient::deleteFriends(
     }
 
     sendReq(ctx, NHttpReqMethod::DEL, "/v2/friend", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::blockFriends(
@@ -1367,7 +1373,7 @@ void RestClient::blockFriends(
     const std::vector<std::string>& usernames,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1387,9 +1393,9 @@ void RestClient::blockFriends(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/friend/block", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listFriends(
@@ -1399,7 +1405,7 @@ void RestClient::listFriends(
     const std::string& cursor,
     std::function<void(NFriendListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::FriendList>());
@@ -1425,9 +1431,9 @@ void RestClient::listFriends(
       args.emplace("cursor", encodeURIComponent(cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/friend", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::createGroup(
@@ -1440,7 +1446,7 @@ void RestClient::createGroup(
     const std::optional<int32_t>& maxCount,
     std::function<void(const NGroup&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto groupData(make_shared<nakama::api::Group>());
@@ -1470,9 +1476,9 @@ void RestClient::createGroup(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteGroup(
@@ -1480,7 +1486,7 @@ void RestClient::deleteGroup(
     const std::string& groupId,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1490,9 +1496,9 @@ void RestClient::deleteGroup(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::DEL, "/v2/group/" + encodeURIComponent(groupId), "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::addGroupUsers(
@@ -1501,7 +1507,7 @@ void RestClient::addGroupUsers(
     const std::vector<std::string>& ids,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1517,9 +1523,9 @@ void RestClient::addGroupUsers(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/add", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listGroupUsers(
@@ -1530,7 +1536,7 @@ void RestClient::listGroupUsers(
     const std::string& cursor,
     std::function<void(NGroupUserListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto groupData(make_shared<nakama::api::GroupUserList>());
@@ -1556,9 +1562,9 @@ void RestClient::listGroupUsers(
       args.emplace("cursor", encodeURIComponent(cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/group/" + encodeURIComponent(groupId) + "/user", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::kickGroupUsers(
@@ -1567,7 +1573,7 @@ void RestClient::kickGroupUsers(
     const std::vector<std::string>& ids,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1583,9 +1589,9 @@ void RestClient::kickGroupUsers(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/kick", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::joinGroup(
@@ -1593,7 +1599,7 @@ void RestClient::joinGroup(
     const std::string& groupId,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1603,9 +1609,9 @@ void RestClient::joinGroup(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/join", "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::leaveGroup(
@@ -1613,7 +1619,7 @@ void RestClient::leaveGroup(
     const std::string& groupId,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1623,9 +1629,9 @@ void RestClient::leaveGroup(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/leave", "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listGroups(
@@ -1635,7 +1641,7 @@ void RestClient::listGroups(
     const std::string& cursor,
     std::function<void(NGroupListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto groupData(make_shared<nakama::api::GroupList>());
@@ -1661,9 +1667,9 @@ void RestClient::listGroups(
       args.emplace("limit", std::to_string(limit));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/group", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listUserGroups(
@@ -1694,7 +1700,7 @@ void RestClient::listUserGroups(
     const std::string& cursor,
     std::function<void(NUserGroupListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto groupData(make_shared<nakama::api::UserGroupList>());
@@ -1720,9 +1726,9 @@ void RestClient::listUserGroups(
       args.emplace("cursor", encodeURIComponent(cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/user/" + encodeURIComponent(userId) + "/group", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::promoteGroupUsers(
@@ -1731,7 +1737,7 @@ void RestClient::promoteGroupUsers(
     const std::vector<std::string>& ids,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1747,9 +1753,9 @@ void RestClient::promoteGroupUsers(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/promote", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::demoteGroupUsers(
@@ -1758,7 +1764,7 @@ void RestClient::demoteGroupUsers(
     const std::vector<std::string>& ids,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1774,9 +1780,9 @@ void RestClient::demoteGroupUsers(
     }
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/group/" + encodeURIComponent(groupId) + "/demote", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::updateGroup(
@@ -1789,7 +1795,7 @@ void RestClient::updateGroup(
     const std::optional<bool>& open,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1816,9 +1822,9 @@ void RestClient::updateGroup(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::PUT, "/v2/group/" + encodeURIComponent(groupId), std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listLeaderboardRecords(
@@ -1829,7 +1835,7 @@ void RestClient::listLeaderboardRecords(
     const std::optional<std::string>& cursor,
     std::function<void(NLeaderboardRecordListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::LeaderboardRecordList>());
@@ -1857,9 +1863,9 @@ void RestClient::listLeaderboardRecords(
       args.emplace("cursor", encodeURIComponent(*cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/leaderboard/" + encodeURIComponent(leaderboardId), "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listLeaderboardRecordsAroundOwner(
@@ -1869,7 +1875,7 @@ void RestClient::listLeaderboardRecordsAroundOwner(
     const std::optional<int32_t>& limit,
     std::function<void(NLeaderboardRecordListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::LeaderboardRecordList>());
@@ -1894,9 +1900,9 @@ void RestClient::listLeaderboardRecordsAroundOwner(
         ctx, NHttpReqMethod::GET,
         "/v2/leaderboard/" + encodeURIComponent(leaderboardId) + "/owner/" + encodeURIComponent(ownerId), "",
         std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::writeLeaderboardRecord(
@@ -1907,7 +1913,7 @@ void RestClient::writeLeaderboardRecord(
     const std::optional<std::string>& metadata,
     std::function<void(NLeaderboardRecord)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::LeaderboardRecord>());
@@ -1935,9 +1941,9 @@ void RestClient::writeLeaderboardRecord(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/leaderboard/" + encodeURIComponent(leaderboardId), std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::writeTournamentRecord(
@@ -1948,7 +1954,7 @@ void RestClient::writeTournamentRecord(
     const std::optional<std::string>& metadata,
     std::function<void(NLeaderboardRecord)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::LeaderboardRecord>());
@@ -1976,9 +1982,9 @@ void RestClient::writeTournamentRecord(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::PUT, "/v2/tournament/" + encodeURIComponent(tournamentId), std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteLeaderboardRecord(
@@ -1986,7 +1992,7 @@ void RestClient::deleteLeaderboardRecord(
     const std::string& leaderboardId,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -1996,9 +2002,9 @@ void RestClient::deleteLeaderboardRecord(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::DEL, "/v2/leaderboard/" + encodeURIComponent(leaderboardId), "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listMatches(
@@ -2011,7 +2017,7 @@ void RestClient::listMatches(
     const std::optional<bool>& authoritative,
     std::function<void(NMatchListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::MatchList>());
@@ -2043,9 +2049,9 @@ void RestClient::listMatches(
       AddBoolArg(args, "authoritative", *authoritative);
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/match", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listNotifications(
@@ -2054,7 +2060,7 @@ void RestClient::listNotifications(
     const std::optional<std::string>& cacheableCursor,
     std::function<void(NNotificationListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::NotificationList>());
@@ -2078,9 +2084,9 @@ void RestClient::listNotifications(
       args.emplace("cursor", encodeURIComponent(*cacheableCursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/notification", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteNotifications(
@@ -2088,7 +2094,7 @@ void RestClient::deleteNotifications(
     const std::vector<std::string>& notificationIds,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -2106,9 +2112,9 @@ void RestClient::deleteNotifications(
     }
 
     sendReq(ctx, NHttpReqMethod::DEL, "/v2/notification", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listChannelMessages(
@@ -2119,7 +2125,7 @@ void RestClient::listChannelMessages(
     const std::optional<bool>& forward,
     std::function<void(NChannelMessageListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::ChannelMessageList>());
@@ -2145,9 +2151,9 @@ void RestClient::listChannelMessages(
       AddBoolArg(args, "forward", *forward);
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/channel/" + encodeURIComponent(channelId), "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listTournaments(
@@ -2160,7 +2166,7 @@ void RestClient::listTournaments(
     const std::optional<std::string>& cursor,
     std::function<void(NTournamentListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::TournamentList>());
@@ -2192,9 +2198,9 @@ void RestClient::listTournaments(
       args.emplace("cursor", encodeURIComponent(*cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/tournament", "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listTournamentRecords(
@@ -2205,7 +2211,7 @@ void RestClient::listTournamentRecords(
     const std::vector<std::string>& ownerIds,
     std::function<void(NTournamentRecordListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::TournamentRecordList>());
@@ -2233,9 +2239,9 @@ void RestClient::listTournamentRecords(
     }
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/tournament/" + encodeURIComponent(tournamentId), "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listTournamentRecordsAroundOwner(
@@ -2245,7 +2251,7 @@ void RestClient::listTournamentRecordsAroundOwner(
     const std::optional<int32_t>& limit,
     std::function<void(NTournamentRecordListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::TournamentRecordList>());
@@ -2270,9 +2276,9 @@ void RestClient::listTournamentRecordsAroundOwner(
         ctx, NHttpReqMethod::GET,
         "/v2/tournament/" + encodeURIComponent(tournamentId) + "/owner/" + encodeURIComponent(ownerId), "",
         std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::joinTournament(
@@ -2280,7 +2286,7 @@ void RestClient::joinTournament(
     const std::string& tournamentId,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -2290,9 +2296,9 @@ void RestClient::joinTournament(
     ctx->errorCallback = errorCallback;
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/tournament/" + encodeURIComponent(tournamentId) + "/join", "");
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listStorageObjects(
@@ -2302,7 +2308,7 @@ void RestClient::listStorageObjects(
     const std::optional<std::string>& cursor,
     std::function<void(NStorageObjectListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::StorageObjectList>());
@@ -2326,9 +2332,9 @@ void RestClient::listStorageObjects(
       args.emplace("cursor", encodeURIComponent(*cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/storage/" + encodeURIComponent(collection), "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::listUsersStorageObjects(
@@ -2339,7 +2345,7 @@ void RestClient::listUsersStorageObjects(
     const std::optional<std::string>& cursor,
     std::function<void(NStorageObjectListPtr)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::StorageObjectList>());
@@ -2364,9 +2370,9 @@ void RestClient::listUsersStorageObjects(
       args.emplace("cursor", encodeURIComponent(*cursor));
 
     sendReq(ctx, NHttpReqMethod::GET, "/v2/storage/" + encodeURIComponent(collection), "", std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::writeStorageObjects(
@@ -2374,7 +2380,7 @@ void RestClient::writeStorageObjects(
     const std::vector<NStorageObjectWrite>& objects,
     std::function<void(const NStorageObjectAcks&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::StorageObjectAcks>());
@@ -2418,9 +2424,9 @@ void RestClient::writeStorageObjects(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::PUT, "/v2/storage", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::readStorageObjects(
@@ -2428,7 +2434,7 @@ void RestClient::readStorageObjects(
     const std::vector<NReadStorageObjectId>& objectIds,
     std::function<void(const NStorageObjects&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::StorageObjects>());
@@ -2465,9 +2471,9 @@ void RestClient::readStorageObjects(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::POST, "/v2/storage", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::deleteStorageObjects(
@@ -2475,7 +2481,7 @@ void RestClient::deleteStorageObjects(
     const std::vector<NDeleteStorageObjectId>& objectIds,
     std::function<void()> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     RestReqContext* ctx = createReqContext(nullptr);
@@ -2505,9 +2511,9 @@ void RestClient::deleteStorageObjects(
     string body = jsonDocToStr(document);
 
     sendReq(ctx, NHttpReqMethod::PUT, "/v2/storage/delete", std::move(body));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::rpc(
@@ -2516,7 +2522,7 @@ void RestClient::rpc(
     const std::optional<std::string>& payload,
     std::function<void(const NRpc&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::Rpc>());
@@ -2533,9 +2539,9 @@ void RestClient::rpc(
     ctx->errorCallback = errorCallback;
 
     sendRpc(ctx, id, payload, {});
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::rpc(
@@ -2544,7 +2550,7 @@ void RestClient::rpc(
     const std::optional<std::string>& payload,
     std::function<void(const NRpc&)> successCallback,
     ErrorCallback errorCallback) {
-  try {
+  _TRY_BEGIN
     NLOG_INFO("...");
 
     auto data(make_shared<nakama::api::Rpc>());
@@ -2563,9 +2569,9 @@ void RestClient::rpc(
     args.emplace("http_key", encodeURIComponent(http_key));
 
     sendRpc(ctx, id, payload, std::move(args));
-  } catch (exception& e) {
-    NLOG_ERROR("exception: " + string(e.what()));
-  }
+  _CATCH (exception& e)
+    NLOG_ERROR("exception: " + string(_WHAT(e)));
+  _CATCH_END
 }
 
 void RestClient::sendRpc(
