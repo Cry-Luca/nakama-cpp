@@ -59,12 +59,6 @@ private:
 
 HC_DEFINE_TRACE_AREA(wsTransportLibHC, HCTraceLevel::Verbose);
 
-// We do not call HCCleanup() on purpose to prevent indefinite hang.
-// Because of that, lets not re-init every instantiation , even though it is safe, it still
-// piling up reference count. It is better to have exactly one HCInitialize unpaired
-// with HCCleanup, than unspecified number of them.
-static bool g_libhc_initialized = false;
-
 static NTimestamp getUnixTimestampMs() {
   using namespace std::chrono;
   auto ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
@@ -132,16 +126,14 @@ std::unique_ptr<NWebsocketLibHC> NWebsocketLibHC::New(const NPlatformParameters&
   (void)platformParams;
   HCInitArgs* initArgsParam = nullptr;
 #endif
-  if (!g_libhc_initialized) {
-    HRESULT hr = HCInitialize(initArgsParam);
-    if (FAILED(hr)) {
-      HC_TRACE_ERROR_HR(wsTransportLibHC, hr, "HCInitialize failed");
-      return nullptr;
-    }
-    g_libhc_initialized = true;
+  HRESULT hr = HCInitialize(initArgsParam);
+  if (FAILED(hr)) {
+    HC_TRACE_ERROR_HR(wsTransportLibHC, hr, "HCInitialize failed");
+    return nullptr;
   }
+
   XTaskQueueHandle q = nullptr;
-  HRESULT hr = XTaskQueueCreate(
+  hr = XTaskQueueCreate(
       XTaskQueueDispatchMode::ThreadPool,
       XTaskQueueDispatchMode::Manual, // callbacks from ticks
       &q);
@@ -172,8 +164,7 @@ NWebsocketLibHC::~NWebsocketLibHC() noexcept {
   m_ws.reset(nullptr);
   m_queue.reset(nullptr);
 
-  // Don't cleanup on purpose, because of https://github.com/microsoft/libHttpClient/issues/696
-  // HCCleanup();
+  HCCleanup();
   HC_TRACE_INFORMATION(wsTransportLibHC, "Destroying instance %p", this);
 }
 
