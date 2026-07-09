@@ -384,7 +384,7 @@ NAKAMA_NAMESPACE_BEGIN
          * @param partyId The party ID to accept the join request for.
          * @param presence The presence to accept as a party member.
          */
-        virtual void acceptPartyMember(const std::string& partyId, NUserPresence& presence, std::function<void()> successCallback = nullptr, RtErrorCallback errorCallback = nullptr) = 0;
+        virtual void acceptPartyMember(const std::string& partyId, const NUserPresence& presence, std::function<void()> successCallback = nullptr, RtErrorCallback errorCallback = nullptr) = 0;
 
         /**
          * Begin matchmaking as a party.

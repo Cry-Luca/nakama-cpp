@@ -155,7 +155,7 @@ public:
 
   void acceptPartyMember(
       const std::string& partyId,
-      NUserPresence& presence,
+      const NUserPresence& presence,
       std::function<void()> successCallback = nullptr,
       RtErrorCallback errorCallback = nullptr) override;
 

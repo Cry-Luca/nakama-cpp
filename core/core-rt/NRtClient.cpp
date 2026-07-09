@@ -793,7 +793,7 @@ void NRtClient::rpc(
 
 void NRtClient::acceptPartyMember(
     const std::string& partyId,
-    NUserPresence& presence,
+    const NUserPresence& presence,
     std::function<void()> successCallback,
     RtErrorCallback errorCallback) {
   NLOG_INFO("...");
