@@ -87,7 +87,7 @@ RestClient::RestClient(const NClientParameters& parameters, NHttpTransportPtr ht
 
   _httpClient->setBaseUri(baseUrl);
 
-  _basicAuthMetadata = "Basic " + base64Encode(parameters.serverKey + ":");
+  _serverKeyProvider = parameters.serverKeyProvider;
 }
 
 RestClient::~RestClient() {
@@ -115,7 +115,31 @@ RestReqContext* RestClient::createReqContext(google::protobuf::Message* data) {
   return ctx;
 }
 
-void RestClient::setBasicAuth(RestReqContext* ctx) { ctx->auth.append(_basicAuthMetadata); }
+namespace {
+  void secureWipe(std::string & s)
+  {
+    if (!s.empty())
+    {
+      volatile char* p = &s[0];
+      for (size_t i = 0; i < s.size(); ++i)
+      {
+        p[i] = 0;
+      }
+      s.clear();
+    }
+  }
+}
+
+void RestClient::setBasicAuth(RestReqContext* ctx)
+{
+  std::string key = _serverKeyProvider ? _serverKeyProvider() : std::string("defaultkey");
+  std::string keyColon = key + ":";
+  std::string header = "Basic " + base64Encode(keyColon);
+  ctx->auth.append(header);
+  secureWipe(key);
+  secureWipe(keyColon);
+  secureWipe(header);
+}
 
 void RestClient::setSessionAuth(RestReqContext* ctx, NSessionPtr session) {
   ctx->auth.append("Bearer ").append(session->getAuthToken());
@@ -137,7 +161,10 @@ void RestClient::sendReq(
   req.headers.emplace("Accept", "application/json");
   req.headers.emplace("Content-Type", "application/json");
   if (!ctx->auth.empty())
+  {
     req.headers.emplace("Authorization", std::move(ctx->auth));
+    secureWipe(ctx->auth);
+  }
 
   _httpClient->request(req, [this, ctx](NHttpResponsePtr response) { onResponse(ctx, response); });
 }

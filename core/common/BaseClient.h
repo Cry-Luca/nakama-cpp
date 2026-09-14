@@ -354,7 +354,7 @@ protected:
   int _port = -1;
   bool _ssl = false;
   std::string _host;
-  std::string _basicAuthMetadata;
+  std::function<std::string()> _serverKeyProvider;
   void* _userData = nullptr;
   ErrorCallback _defaultErrorCallback;
   NPlatformParameters _platformParams;

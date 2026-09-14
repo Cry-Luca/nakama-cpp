@@ -25,9 +25,8 @@
 NAKAMA_NAMESPACE_BEGIN
 
 struct NClientParameters {
-  /// The key used to authenticate with the server without a session. Defaults
-  /// to "defaultkey".
-  std::string serverKey = "defaultkey";
+  /// The server key provider to authenticate with the server without a session.
+  std::function<std::string()> serverKeyProvider;
 
   /// The host address of the server. Defaults to "127.0.0.1".
   std::string host = "127.0.0.1";
