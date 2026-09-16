@@ -755,8 +755,11 @@ void NRtClient::updateStatus(
   NLOG_INFO("...");
 
   ::nakama::realtime::Envelope msg;
+  auto* data = msg.mutable_status_update();
 
-  msg.mutable_status_update()->mutable_status()->set_value(status);
+  // Empty string don't set 'status' field, to make the user appear offline/invisible
+  if (!status.empty())
+    data->mutable_status()->set_value(status);
 
   std::shared_ptr<RtRequestContext> ctx = createReqContext(msg);
 
