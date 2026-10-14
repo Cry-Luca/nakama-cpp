@@ -40,6 +40,7 @@ public:
 
   NRtClientPtr createRtClient(NRtTransportPtr transport) override;
 
+#ifndef NAKAMA_NO_ASYNC_API
   std::future<NSessionPtr> authenticateDeviceAsync(
       const std::string& id,
       const std::optional<std::string>& username,
@@ -349,6 +350,7 @@ public:
 
   std::future<NRpc>
   rpcAsync(const std::string& http_key, const std::string& id, const std::optional<std::string>& payload) override;
+#endif // NAKAMA_NO_ASYNC_API
 
 protected:
   int _port = -1;

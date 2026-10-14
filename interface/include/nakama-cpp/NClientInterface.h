@@ -1141,6 +1141,7 @@ public:
       std::function<void(const NRpc&)> successCallback = nullptr,
       ErrorCallback errorCallback = nullptr) = 0;
 
+#ifndef NAKAMA_NO_ASYNC_API
   /**
    * Authenticate a user with a device id.
    *
@@ -1977,6 +1978,7 @@ public:
       const std::string& http_key,
       const std::string& id,
       const std::optional<std::string>& payload = std::nullopt) = 0;
+#endif // NAKAMA_NO_ASYNC_API
 };
 
 using NClientPtr = std::shared_ptr<NClientInterface>;

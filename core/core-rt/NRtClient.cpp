@@ -35,7 +35,7 @@
 namespace Nakama {
 
 NRtClient::NRtClient(NRtTransportPtr transport, const std::string& host, int32_t port, bool ssl)
-    : _host(host), _port(port), _ssl(ssl), _transport(transport), _connectPromise(nullptr) {
+    : _host(host), _port(port), _ssl(ssl), _transport(transport) {
   NLOG_INFO("Created");
 
   if (_port == DEFAULT_PORT) {
@@ -101,6 +101,7 @@ void NRtClient::connect(NSessionPtr session, bool createStatus, NRtClientProtoco
   _transport->connect(url, transportType);
 }
 
+#ifndef NAKAMA_NO_ASYNC_API
 std::future<void> NRtClient::connectAsync(NSessionPtr session, bool createStatus, NRtClientProtocol protocol) {
   if (_transport->isConnected() || _transport->isConnecting()) {
     std::promise<void> emptyPromise = std::promise<void>();
@@ -114,6 +115,7 @@ std::future<void> NRtClient::connectAsync(NSessionPtr session, bool createStatus
   connect(session, createStatus, protocol);
   return connectFuture;
 }
+#endif
 
 bool NRtClient::isConnecting() const { return _transport->isConnecting(); }
 
@@ -124,6 +126,7 @@ void NRtClient::disconnect() {
   disconnect(info);
 }
 
+#ifndef NAKAMA_NO_ASYNC_API
 std::future<void> NRtClient::disconnectAsync() {
   // currently, disconnect callback is invoked immediately by client here, so we just return a completed future.
   disconnect();
@@ -131,6 +134,7 @@ std::future<void> NRtClient::disconnectAsync() {
   emptyPromise.set_value();
   return emptyPromise.get_future();
 }
+#endif
 
 void NRtClient::disconnect(const NRtClientDisconnectInfo& info) {
   // This weird logic to check predisconnect state is here to support case
@@ -170,6 +174,7 @@ void NRtClient::onTransportConnected() {
     _listener->onConnect();
   }
 
+#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       // signal to the user's future that the connection has completed.
@@ -182,6 +187,7 @@ void NRtClient::onTransportConnected() {
     //  The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport connect: " + std::string(_WHAT(e)));
   _CATCH_END
+#endif
 }
 
 void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
@@ -193,6 +199,7 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
     _listener->onDisconnect(info);
   }
 
+#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       // assume we are disconnecting mid-connect
@@ -207,6 +214,7 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport disconnect: " + std::string(_WHAT(e)));
   _CATCH_END
+#endif
 }
 
 void NRtClient::onTransportError(const std::string& description) {
@@ -222,6 +230,7 @@ void NRtClient::onTransportError(const std::string& description) {
     _listener->onError(error);
   }
 
+#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       _connectPromise->set_exception(
@@ -235,6 +244,7 @@ void NRtClient::onTransportError(const std::string& description) {
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport error: " + std::string(_WHAT(e)));
   _CATCH_END
+#endif
 }
 
 void NRtClient::onTransportMessage(const NBytes& data) {
@@ -1082,6 +1092,7 @@ void NRtClient::ping(std::function<void()> successCallback, RtErrorCallback erro
   send(msg);
 }
 
+#ifndef NAKAMA_NO_ASYNC_API
 std::future<NChannelPtr> NRtClient::joinChatAsync(
     const std::string& target,
     NChannelType type,
@@ -1335,6 +1346,7 @@ std::future<void> NRtClient::sendPartyDataAsync(const std::string& partyId, long
   promise->set_value();
   return promise->get_future();
 }
+#endif // NAKAMA_NO_ASYNC_API
 
 std::shared_ptr<RtRequestContext> NRtClient::createReqContext(::nakama::realtime::Envelope& msg) {
   std::lock_guard<std::mutex> lock(_reqContextsLock);

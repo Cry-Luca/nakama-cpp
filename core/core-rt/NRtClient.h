@@ -51,14 +51,18 @@ public:
   std::optional<int> getHeartbeatIntervalMs() override { return _heartbeatIntervalMs; }
 
   void connect(NSessionPtr session, bool createStatus, NRtClientProtocol protocol) override;
+#ifndef NAKAMA_NO_ASYNC_API
   std::future<void> connectAsync(NSessionPtr session, bool createStatus, NRtClientProtocol protocol) override;
+#endif
 
   bool isConnecting() const override;
   bool isConnected() const override;
 
   void disconnect() override;
 
+#ifndef NAKAMA_NO_ASYNC_API
   std::future<void> disconnectAsync() override;
+#endif
 
   void joinChat(
       const std::string& target,
@@ -216,6 +220,7 @@ public:
 
   void sendPartyData(const std::string& partyId, long opCode, NBytes& data) override;
 
+#ifndef NAKAMA_NO_ASYNC_API
   std::future<NChannelPtr> joinChatAsync(
       const std::string& target,
       NChannelType type,
@@ -294,6 +299,7 @@ public:
   std::future<void> removePartyMemberAsync(const std::string& partyId, NUserPresence& presence) override;
 
   std::future<void> sendPartyDataAsync(const std::string& partyId, long opCode, NBytes& data) override;
+#endif // NAKAMA_NO_ASYNC_API
 
 protected:
   void onTransportConnected();
@@ -331,6 +337,8 @@ private:
   bool _heartbeatFailureReported = false;
   std::optional<int> _heartbeatIntervalMs = 5000;
   std::atomic<bool> _wantDisconnect = false;
+#ifndef NAKAMA_NO_ASYNC_API
   std::unique_ptr<std::promise<void>> _connectPromise = nullptr;
+#endif
 };
 } // namespace Nakama

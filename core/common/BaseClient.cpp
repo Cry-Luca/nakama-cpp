@@ -47,6 +47,7 @@ NRtClientPtr BaseClient::createRtClient(NRtTransportPtr transport) {
   return client;
 }
 
+#ifndef NAKAMA_NO_ASYNC_API
 std::future<NSessionPtr> BaseClient::authenticateDeviceAsync(
     const std::string& id,
     const std::optional<std::string>& username,
@@ -929,5 +930,6 @@ BaseClient::rpcAsync(const std::string& http_key, const std::string& id, const s
 
   return promise->get_future();
 }
+#endif // NAKAMA_NO_ASYNC_API
 
 } // namespace Nakama
