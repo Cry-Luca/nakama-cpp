@@ -32,10 +32,17 @@
 #define _WHAT(e)
 #endif
 
+// As of SCE SDK 14.000, std::make_exception_ptr can only compile with exceptions enabled
+#if !_HAS_EXCEPTIONS && defined(__SCE__)
+#define _MAKE_EXCEPTION_PTR(error) std::exception_ptr(new NRtException(error))
+#else
+#define _MAKE_EXCEPTION_PTR(error) std::make_exception_ptr<NRtException>(error)
+#endif
+
 namespace Nakama {
 
 NRtClient::NRtClient(NRtTransportPtr transport, const std::string& host, int32_t port, bool ssl)
-    : _host(host), _port(port), _ssl(ssl), _transport(transport) {
+    : _host(host), _port(port), _ssl(ssl), _transport(transport), _connectPromise(nullptr) {
   NLOG_INFO("Created");
 
   if (_port == DEFAULT_PORT) {
@@ -101,7 +108,6 @@ void NRtClient::connect(NSessionPtr session, bool createStatus, NRtClientProtoco
   _transport->connect(url, transportType);
 }
 
-#ifndef NAKAMA_NO_ASYNC_API
 std::future<void> NRtClient::connectAsync(NSessionPtr session, bool createStatus, NRtClientProtocol protocol) {
   if (_transport->isConnected() || _transport->isConnecting()) {
     std::promise<void> emptyPromise = std::promise<void>();
@@ -115,7 +121,6 @@ std::future<void> NRtClient::connectAsync(NSessionPtr session, bool createStatus
   connect(session, createStatus, protocol);
   return connectFuture;
 }
-#endif
 
 bool NRtClient::isConnecting() const { return _transport->isConnecting(); }
 
@@ -126,7 +131,6 @@ void NRtClient::disconnect() {
   disconnect(info);
 }
 
-#ifndef NAKAMA_NO_ASYNC_API
 std::future<void> NRtClient::disconnectAsync() {
   // currently, disconnect callback is invoked immediately by client here, so we just return a completed future.
   disconnect();
@@ -134,7 +138,6 @@ std::future<void> NRtClient::disconnectAsync() {
   emptyPromise.set_value();
   return emptyPromise.get_future();
 }
-#endif
 
 void NRtClient::disconnect(const NRtClientDisconnectInfo& info) {
   // This weird logic to check predisconnect state is here to support case
@@ -174,7 +177,6 @@ void NRtClient::onTransportConnected() {
     _listener->onConnect();
   }
 
-#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       // signal to the user's future that the connection has completed.
@@ -187,7 +189,6 @@ void NRtClient::onTransportConnected() {
     //  The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport connect: " + std::string(_WHAT(e)));
   _CATCH_END
-#endif
 }
 
 void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
@@ -199,13 +200,11 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
     _listener->onDisconnect(info);
   }
 
-#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       // assume we are disconnecting mid-connect
       _connectPromise->set_exception(
-          std::make_exception_ptr<NRtException>(
-              NRtException(NRtError(RtErrorCode::CONNECT_ERROR, "Disconnected while connecting."))));
+          _MAKE_EXCEPTION_PTR(NRtError(RtErrorCode::CONNECT_ERROR, "Disconnected while connecting.")));
       _connectPromise.reset(nullptr);
     }
   _CATCH (const std::future_error& e)
@@ -214,7 +213,6 @@ void NRtClient::onTransportDisconnected(const NRtClientDisconnectInfo& info) {
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport disconnect: " + std::string(_WHAT(e)));
   _CATCH_END
-#endif
 }
 
 void NRtClient::onTransportError(const std::string& description) {
@@ -230,12 +228,10 @@ void NRtClient::onTransportError(const std::string& description) {
     _listener->onError(error);
   }
 
-#ifndef NAKAMA_NO_ASYNC_API
   _TRY_BEGIN
     if (_connectPromise) {
       _connectPromise->set_exception(
-          std::make_exception_ptr<NRtException>(
-              NRtException(NRtError(RtErrorCode::CONNECT_ERROR, "An error occurred while connecting."))));
+          _MAKE_EXCEPTION_PTR(NRtError(RtErrorCode::CONNECT_ERROR, "An error occurred while connecting.")));
       _connectPromise.reset(nullptr);
     }
   _CATCH (const std::future_error& e)
@@ -244,7 +240,6 @@ void NRtClient::onTransportError(const std::string& description) {
     // The shared state already stores a value or exception. The error code is set to promise_already_satisfied.
     NLOG_WARN("Unexpected exception caught on transport error: " + std::string(_WHAT(e)));
   _CATCH_END
-#endif
 }
 
 void NRtClient::onTransportMessage(const NBytes& data) {
@@ -1092,7 +1087,6 @@ void NRtClient::ping(std::function<void()> successCallback, RtErrorCallback erro
   send(msg);
 }
 
-#ifndef NAKAMA_NO_ASYNC_API
 std::future<NChannelPtr> NRtClient::joinChatAsync(
     const std::string& target,
     NChannelType type,
@@ -1102,7 +1096,7 @@ std::future<NChannelPtr> NRtClient::joinChatAsync(
 
   joinChat(
       target, type, persistence, hidden, [=](NChannelPtr channel) { promise->set_value(channel); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1120,7 +1114,7 @@ NRtClient::writeChatMessageAsync(const std::string& channelId, const std::string
 
   writeChatMessage(
       channelId, content, [=](const NChannelMessageAck& ack) { promise->set_value(ack); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1133,7 +1127,7 @@ std::future<NChannelMessageAck> NRtClient::updateChatMessageAsync(
 
   updateChatMessage(
       channelId, messageId, content, [=](const NChannelMessageAck& ack) { promise->set_value(ack); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1150,7 +1144,7 @@ std::future<NMatch> NRtClient::createMatchAsync() {
 
   createMatch(
       [=](const NMatch& match) { promise->set_value(match); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1160,7 +1154,7 @@ std::future<NMatch> NRtClient::joinMatchAsync(const std::string& matchId, const 
 
   joinMatch(
       matchId, metadata, [=](const NMatch& match) { promise->set_value(match); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1170,7 +1164,7 @@ std::future<NMatch> NRtClient::joinMatchByTokenAsync(const std::string& token) {
 
   joinMatchByToken(
       token, [=](const NMatch& match) { promise->set_value(match); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1194,7 +1188,7 @@ std::future<NMatchmakerTicket> NRtClient::addMatchmakerAsync(
   addMatchmaker(
       minCount, maxCount, query, stringProperties, numericProperties, countMultiple,
       [=](const NMatchmakerTicket& ticket) { promise->set_value(ticket); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1222,7 +1216,7 @@ std::future<NStatus> NRtClient::followUsersAsync(const std::vector<std::string>&
 
   followUsers(
       userIds, [=](const NStatus& ticket) { promise->set_value(ticket); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1247,7 +1241,7 @@ std::future<NRpc> NRtClient::rpcAsync(const std::string& id, const std::optional
   rpc(
       id, payload, [=](const NRpc& rpc) { promise->set_value(rpc); },
       [=](const NRtError& error) {
-        promise->set_exception(std::make_exception_ptr<NRtException>(error));
+        promise->set_exception(_MAKE_EXCEPTION_PTR(error));
       });
 
   return promise->get_future();
@@ -1273,7 +1267,7 @@ std::future<NPartyMatchmakerTicket> NRtClient::addMatchmakerPartyAsync(
   addMatchmakerParty(
       partyId, query, minCount, maxCount, stringProperties, numericProperties, countMultiple,
       [=](const NPartyMatchmakerTicket& ticket) { promise->set_value(ticket); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1290,7 +1284,7 @@ std::future<NParty> NRtClient::createPartyAsync(bool open, int maxSize) {
 
   createParty(
       open, maxSize, [=](const NParty& party) { promise->set_value(party); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1314,7 +1308,7 @@ std::future<NPartyJoinRequest> NRtClient::listPartyJoinRequestsAsync(const std::
 
   listPartyJoinRequests(
       partyId, [=](const NPartyJoinRequest& partyJoinRequest) { promise->set_value(partyJoinRequest); },
-      [=](const NRtError& error) { promise->set_exception(std::make_exception_ptr<NRtException>(error)); });
+      [=](const NRtError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -1346,7 +1340,6 @@ std::future<void> NRtClient::sendPartyDataAsync(const std::string& partyId, long
   promise->set_value();
   return promise->get_future();
 }
-#endif // NAKAMA_NO_ASYNC_API
 
 std::shared_ptr<RtRequestContext> NRtClient::createReqContext(::nakama::realtime::Envelope& msg) {
   std::lock_guard<std::mutex> lock(_reqContextsLock);

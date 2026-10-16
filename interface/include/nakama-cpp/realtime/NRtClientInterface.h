@@ -143,7 +143,6 @@ NAKAMA_NAMESPACE_BEGIN
          */
         virtual void connect(NSessionPtr session, bool createStatus, NRtClientProtocol protocol = NRtClientProtocol::Protobuf) = 0;
 
-#ifndef NAKAMA_NO_ASYNC_API
         /**
          * Connect to the server.
          *
@@ -152,7 +151,6 @@ NAKAMA_NAMESPACE_BEGIN
          * @param protocol Communication protocol. Default is Protobuf.
          */
         virtual std::future<void> connectAsync(NSessionPtr session, bool createStatus, NRtClientProtocol protocol = NRtClientProtocol::Protobuf) = 0;
-#endif
 
         /**
          * @return True if connecting to server.
@@ -169,12 +167,10 @@ NAKAMA_NAMESPACE_BEGIN
          */
         virtual void disconnect() = 0;
 
-#ifndef NAKAMA_NO_ASYNC_API
         /**
          * Close the connection with the server.
          */
         virtual std::future<void> disconnectAsync() = 0;
-#endif
 
         /**
          * Join a chat channel on the server.
@@ -465,7 +461,6 @@ NAKAMA_NAMESPACE_BEGIN
          */
         virtual void sendPartyData(const std::string& partyId, long opCode, NBytes& data) = 0;
 
-#ifndef NAKAMA_NO_ASYNC_API
         /**
          * Join a chat channel on the server.
          *
@@ -722,7 +717,6 @@ NAKAMA_NAMESPACE_BEGIN
          * @param data The input data to send from the byte buffer, if any.
          */
         virtual std::future<void> sendPartyDataAsync(const std::string& partyId, long opCode, NBytes& data) = 0;
-#endif // NAKAMA_NO_ASYNC_API
     };
 
     using NRtClientPtr = std::shared_ptr<NRtClientInterface>;

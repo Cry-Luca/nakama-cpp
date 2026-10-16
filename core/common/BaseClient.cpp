@@ -25,6 +25,13 @@
 #include <optional>
 #include <vector>
 
+ // As of SCE SDK 14.000, std::make_exception_ptr can only compile with exceptions enabled
+#if !_HAS_EXCEPTIONS && defined(__SCE__)
+#define _MAKE_EXCEPTION_PTR(error) std::exception_ptr(new NException(error))
+#else
+#define _MAKE_EXCEPTION_PTR(error) std::make_exception_ptr<NException>(error)
+#endif
+
 namespace Nakama {
 
 #ifdef HAVE_DEFAULT_RT_TRANSPORT_FACTORY
@@ -47,7 +54,6 @@ NRtClientPtr BaseClient::createRtClient(NRtTransportPtr transport) {
   return client;
 }
 
-#ifndef NAKAMA_NO_ASYNC_API
 std::future<NSessionPtr> BaseClient::authenticateDeviceAsync(
     const std::string& id,
     const std::optional<std::string>& username,
@@ -58,7 +64,7 @@ std::future<NSessionPtr> BaseClient::authenticateDeviceAsync(
 
   authenticateDevice(
       id, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -73,7 +79,7 @@ std::future<NSessionPtr> BaseClient::authenticateEmailAsync(
 
   authenticateEmail(
       email, password, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -88,7 +94,7 @@ std::future<NSessionPtr> BaseClient::authenticateFacebookAsync(
 
   authenticateFacebook(
       accessToken, username, create, importFriends, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -102,7 +108,7 @@ std::future<NSessionPtr> BaseClient::authenticateGoogleAsync(
 
   authenticateGoogle(
       accessToken, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -122,7 +128,7 @@ std::future<NSessionPtr> BaseClient::authenticateGameCenterAsync(
   authenticateGameCenter(
       playerId, bundleId, timestampSeconds, salt, signature, publicKeyUrl, username, create, vars,
       [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -136,7 +142,7 @@ std::future<NSessionPtr> BaseClient::authenticateAppleAsync(
 
   authenticateApple(
       token, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -150,7 +156,7 @@ std::future<NSessionPtr> BaseClient::authenticateCustomAsync(
 
   authenticateCustom(
       id, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -164,7 +170,7 @@ std::future<NSessionPtr> BaseClient::authenticateSteamAsync(
 
   authenticateSteam(
       token, username, create, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -174,7 +180,7 @@ std::future<NSessionPtr> BaseClient::authenticateRefreshAsync(NSessionPtr sessio
 
   authenticateRefresh(
       session, vars, [=](NSessionPtr session) { promise->set_value(session); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -184,7 +190,7 @@ std::future<void> BaseClient::sessionLogoutAsync(NSessionPtr session) {
 
   sessionLogout(
       session, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -197,7 +203,7 @@ std::future<void> BaseClient::linkFacebookAsync(
 
   linkFacebook(
       session, accessToken, importFriends, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -208,7 +214,7 @@ BaseClient::linkEmailAsync(NSessionPtr session, const std::string& email, const 
 
   linkEmail(
       session, email, password, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -218,7 +224,7 @@ std::future<void> BaseClient::linkDeviceAsync(NSessionPtr session, const std::st
 
   linkDevice(
       session, id, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -228,7 +234,7 @@ std::future<void> BaseClient::linkGoogleAsync(NSessionPtr session, const std::st
 
   linkGoogle(
       session, accessToken, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -245,7 +251,7 @@ std::future<void> BaseClient::linkGameCenterAsync(
 
   linkGameCenter(
       session, playerId, bundleId, timestampSeconds, salt, signature, publicKeyUrl, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -255,7 +261,7 @@ std::future<void> BaseClient::linkAppleAsync(NSessionPtr session, const std::str
 
   linkApple(
       session, token, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -265,7 +271,7 @@ std::future<void> BaseClient::linkSteamAsync(NSessionPtr session, const std::str
 
   linkSteam(
       session, token, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -275,7 +281,7 @@ std::future<void> BaseClient::linkCustomAsync(NSessionPtr session, const std::st
 
   linkCustom(
       session, id, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -285,7 +291,7 @@ std::future<void> BaseClient::unlinkFacebookAsync(NSessionPtr session, const std
 
   unlinkFacebook(
       session, accessToken, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -296,7 +302,7 @@ BaseClient::unlinkEmailAsync(NSessionPtr session, const std::string& email, cons
 
   unlinkEmail(
       session, email, password, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -306,7 +312,7 @@ std::future<void> BaseClient::unlinkGoogleAsync(NSessionPtr session, const std::
 
   unlinkGoogle(
       session, accessToken, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -323,7 +329,7 @@ std::future<void> BaseClient::unlinkGameCenterAsync(
 
   unlinkGameCenter(
       session, playerId, bundleId, timestampSeconds, salt, signature, publicKeyUrl, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -333,7 +339,7 @@ std::future<void> BaseClient::unlinkAppleAsync(NSessionPtr session, const std::s
 
   unlinkApple(
       session, token, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -343,7 +349,7 @@ std::future<void> BaseClient::unlinkSteamAsync(NSessionPtr session, const std::s
 
   unlinkSteam(
       session, token, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -353,7 +359,7 @@ std::future<void> BaseClient::unlinkDeviceAsync(NSessionPtr session, const std::
 
   unlinkDevice(
       session, id, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -363,7 +369,7 @@ std::future<void> BaseClient::unlinkCustomAsync(NSessionPtr session, const std::
 
   unlinkCustom(
       session, id, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -376,7 +382,7 @@ std::future<void> BaseClient::importFacebookFriendsAsync(
 
   importFacebookFriends(
       session, token, reset, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -386,7 +392,7 @@ std::future<NAccount> BaseClient::getAccountAsync(NSessionPtr session) {
 
   getAccount(
       session, [=](const NAccount& account) { promise->set_value(account); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -396,7 +402,7 @@ std::future<void> BaseClient::deleteAccountAsync(NSessionPtr session) {
 
   deleteAccount(
       session, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -413,7 +419,7 @@ std::future<void> BaseClient::updateAccountAsync(
 
   updateAccount(
       session, username, displayName, avatarUrl, langTag, location, timezone, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -427,7 +433,7 @@ std::future<NUsers> BaseClient::getUsersAsync(
 
   getUsers(
       session, ids, usernames, facebookIds, [=](const NUsers& users) { promise->set_value(users); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -440,7 +446,7 @@ std::future<void> BaseClient::addFriendsAsync(
 
   addFriends(
       session, ids, usernames, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -453,7 +459,7 @@ std::future<void> BaseClient::deleteFriendsAsync(
 
   deleteFriends(
       session, ids, usernames, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -466,7 +472,7 @@ std::future<void> BaseClient::blockFriendsAsync(
 
   blockFriends(
       session, ids, usernames, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -480,7 +486,7 @@ std::future<NFriendListPtr> BaseClient::listFriendsAsync(
 
   listFriends(
       session, limit, state, cursor, [=](NFriendListPtr friendList) { promise->set_value(friendList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -498,7 +504,7 @@ std::future<NGroup> BaseClient::createGroupAsync(
   createGroup(
       session, name, description, avatarUrl, langTag, open, maxCount,
       [=](const NGroup& group) { promise->set_value(group); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -508,7 +514,7 @@ std::future<void> BaseClient::deleteGroupAsync(NSessionPtr session, const std::s
 
   deleteGroup(
       session, groupId, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -519,7 +525,7 @@ BaseClient::addGroupUsersAsync(NSessionPtr session, const std::string& groupId, 
 
   addGroupUsers(
       session, groupId, ids, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -534,7 +540,7 @@ std::future<NGroupUserListPtr> BaseClient::listGroupUsersAsync(
 
   listGroupUsers(
       session, groupId, limit, state, cursor, [=](NGroupUserListPtr groupList) { promise->set_value(groupList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -545,7 +551,7 @@ BaseClient::kickGroupUsersAsync(NSessionPtr session, const std::string& groupId,
 
   kickGroupUsers(
       session, groupId, ids, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -555,7 +561,7 @@ std::future<void> BaseClient::joinGroupAsync(NSessionPtr session, const std::str
 
   joinGroup(
       session, groupId, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -565,7 +571,7 @@ std::future<void> BaseClient::leaveGroupAsync(NSessionPtr session, const std::st
 
   leaveGroup(
       session, groupId, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -576,7 +582,7 @@ BaseClient::listGroupsAsync(NSessionPtr session, const std::string& name, int32_
 
   listGroups(
       session, name, limit, cursor, [=](NGroupListPtr groups) { promise->set_value(groups); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -590,7 +596,7 @@ std::future<NUserGroupListPtr> BaseClient::listUserGroupsAsync(
 
   listUserGroups(
       session, limit, state, cursor, [=](NUserGroupListPtr groupList) { promise->set_value(groupList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -605,7 +611,7 @@ std::future<NUserGroupListPtr> BaseClient::listUserGroupsAsync(
 
   listUserGroups(
       session, userId, limit, state, cursor, [=](NUserGroupListPtr groupList) { promise->set_value(groupList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -618,7 +624,7 @@ std::future<void> BaseClient::promoteGroupUsersAsync(
 
   promoteGroupUsers(
       session, groupId, ids, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -631,7 +637,7 @@ std::future<void> BaseClient::demoteGroupUsersAsync(
 
   demoteGroupUsers(
       session, groupId, ids, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -648,7 +654,7 @@ std::future<void> BaseClient::updateGroupAsync(
 
   updateGroup(
       session, groupId, name, description, avatarUrl, langTag, open, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -664,7 +670,7 @@ std::future<NLeaderboardRecordListPtr> BaseClient::listLeaderboardRecordsAsync(
   listLeaderboardRecords(
       session, leaderboardId, ownerIds, limit, cursor,
       [=](NLeaderboardRecordListPtr recordList) { promise->set_value(recordList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -679,7 +685,7 @@ std::future<NLeaderboardRecordListPtr> BaseClient::listLeaderboardRecordsAroundO
   listLeaderboardRecordsAroundOwner(
       session, leaderboardId, ownerId, limit,
       [=](NLeaderboardRecordListPtr recordList) { promise->set_value(recordList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -694,7 +700,7 @@ std::future<NLeaderboardRecord> BaseClient::writeLeaderboardRecordAsync(
 
   writeLeaderboardRecord(
       session, leaderboardId, score, subscore, metadata, [=](NLeaderboardRecord record) { promise->set_value(record); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -710,7 +716,7 @@ std::future<NLeaderboardRecord> BaseClient::writeTournamentRecordAsync(
   writeLeaderboardRecord(
       session, tournamentId, score, subscore, metadata,
       [=](NLeaderboardRecord recordList) { promise->set_value(recordList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -720,7 +726,7 @@ std::future<void> BaseClient::deleteLeaderboardRecordAsync(NSessionPtr session, 
 
   deleteLeaderboardRecord(
       session, leaderboardId, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -738,7 +744,7 @@ std::future<NMatchListPtr> BaseClient::listMatchesAsync(
   listMatches(
       session, min_size, max_size, limit, label, query, authoritative,
       [=](NMatchListPtr matchList) { promise->set_value(matchList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -752,7 +758,7 @@ std::future<NNotificationListPtr> BaseClient::listNotificationsAsync(
   listNotifications(
       session, limit, cacheableCursor,
       [=](NNotificationListPtr notificationList) { promise->set_value(notificationList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -763,7 +769,7 @@ BaseClient::deleteNotificationsAsync(NSessionPtr session, const std::vector<std:
 
   deleteNotifications(
       session, notificationIds, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -779,7 +785,7 @@ std::future<NChannelMessageListPtr> BaseClient::listChannelMessagesAsync(
   listChannelMessages(
       session, channelId, limit, cursor, forward,
       [=](NChannelMessageListPtr channelMessageList) { promise->set_value(channelMessageList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -797,7 +803,7 @@ std::future<NTournamentListPtr> BaseClient::listTournamentsAsync(
   listTournaments(
       session, categoryStart, categoryEnd, startTime, endTime, limit, cursor,
       [=](NTournamentListPtr tournamentList) { promise->set_value(tournamentList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -813,7 +819,7 @@ std::future<NTournamentRecordListPtr> BaseClient::listTournamentRecordsAsync(
   listTournamentRecords(
       session, tournamentId, limit, cursor, ownerIds,
       [=](NTournamentRecordListPtr tournamentRecordList) { promise->set_value(tournamentRecordList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -828,7 +834,7 @@ std::future<NTournamentRecordListPtr> BaseClient::listTournamentRecordsAroundOwn
   listTournamentRecordsAroundOwner(
       session, tournamentId, ownerId, limit,
       [=](NTournamentRecordListPtr tournamentRecordList) { promise->set_value(tournamentRecordList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -838,7 +844,7 @@ std::future<void> BaseClient::joinTournamentAsync(NSessionPtr session, const std
 
   joinTournament(
       session, tournamentId, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -852,7 +858,7 @@ std::future<NStorageObjectListPtr> BaseClient::listStorageObjectsAsync(
 
   listStorageObjects(
       session, collection, limit, cursor, [=](NStorageObjectListPtr objectList) { promise->set_value(objectList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -868,7 +874,7 @@ std::future<NStorageObjectListPtr> BaseClient::listUsersStorageObjectsAsync(
   listUsersStorageObjects(
       session, collection, userId, limit, cursor,
       [=](NStorageObjectListPtr objectList) { promise->set_value(objectList); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -879,7 +885,7 @@ BaseClient::writeStorageObjectsAsync(NSessionPtr session, const std::vector<NSto
 
   writeStorageObjects(
       session, objects, [=](const NStorageObjectAcks& acks) { promise->set_value(acks); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -890,7 +896,7 @@ BaseClient::readStorageObjectsAsync(NSessionPtr session, const std::vector<NRead
 
   readStorageObjects(
       session, objectIds, [=](NStorageObjects objects) { promise->set_value(objects); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -901,7 +907,7 @@ BaseClient::deleteStorageObjectsAsync(NSessionPtr session, const std::vector<NDe
 
   deleteStorageObjects(
       session, objectIds, [=]() { promise->set_value(); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
@@ -914,7 +920,7 @@ BaseClient::rpcAsync(NSessionPtr session, const std::string& id, const std::opti
       session, id, payload, [=](const NRpc& rpc) { promise->set_value(rpc); },
       [=](const NError& error) {
         NLOG_INFO("rpc async lambda called");
-        promise->set_exception(std::make_exception_ptr<NException>(error));
+        promise->set_exception(_MAKE_EXCEPTION_PTR(error));
       });
 
   return promise->get_future();
@@ -926,10 +932,9 @@ BaseClient::rpcAsync(const std::string& http_key, const std::string& id, const s
 
   rpc(
       http_key, id, payload, [=](const NRpc& rpc) { promise->set_value(rpc); },
-      [=](const NError& error) { promise->set_exception(std::make_exception_ptr<NException>(error)); });
+      [=](const NError& error) { promise->set_exception(_MAKE_EXCEPTION_PTR(error)); });
 
   return promise->get_future();
 }
-#endif // NAKAMA_NO_ASYNC_API
 
 } // namespace Nakama
